@@ -1,0 +1,44 @@
+%% `biblio.tex' file | LaTeX it, don't read it!
+%% Biblio
+%%
+%% last major modification 2001/05/26
+%% last minor modification 2010/08/23
+%% last minor modification 2012/10/30 by lina
+%%
+\NeedsTeXFormat{LaTeX2e}[1997/06/01]
+\documentclass[a4paper]{article}
+\listfiles
+\title{\sc{biblio}}
+\author{Nemo ANONYMOUS}
+\date{\texttt{processed \today}}
+
+\ifx\pdfoutput\undefined
+\usepackage[OT1]{fontenc}
+%\usepackage[T1]{fontenc}
+\else \pdfcompresslevel=9
+\usepackage[OT1]{fontenc}
+\usepackage[latin1]{inputenc}
+\fi
+%%\usepackage{multicol}
+\usepackage{gtsIndex}
+%\usepackage[french]{babel}
+\usepackage[english]{babel}
+\usepackage{geometry}
+
+\ifx\pdfoutput\undefined\else
+\IfFileExists{thumbpdf.sty}{\def\ThumbpdfDriver{pdftex}\input{thumbpdf.sty}}{}
+\fi
+
+\makeauthorindex
+
+\begin{document}
+\maketitle
+
+\nocite{*}
+\bibliographystyle{gtsAlpha}
+\bibliography{biophyabbrev,biophymd}
+\printauthorindex
+
+\end{document}
+%%
+%% End of file `biblio.tex'.

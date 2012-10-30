@@ -1,0 +1,186 @@
+%%
+%% This is file `gtsIndex.sty',
+%% created by hand.
+%% last major modification: 1999/09/08
+%%
+\NeedsTeXFormat{LaTeX2e}[1995/12/01]
+\ProvidesPackage{gtsIndex}[1999/06/21 v0.9a GTS project: Index support]
+\RequirePackage{index}[1995/09/28]%(ftp://theory.lcs.mit.edu/pub/tex/index/)
+\RequirePackage{autind}%[1995/09/28](ftp://theory.lcs.mit.edu/pub/tex/index/)
+%%%%\RequirePackage{glosstex}[1997/12/13]
+
+%%%%\InputIfFileExists{gtsIndex.ini}{}{\def\gdfpath{./}}
+\indexproofstyle{\scriptsize\ttfamily}
+
+\def\newind@x#1#2#3{%
+  \newindex{#1}{#1.idx}{#1.ind}{#2}
+  \def\ind@xstyl@{#3}
+  \ifx\ind@xstyl@\@empty%
+    \m@keind@xcmdline{%
+      -o \jobname.#1.ind %
+      -t \jobname.#1.ilg %
+      \jobname.#1.idx}
+  \else
+    \m@keind@xcmdline{%
+      -s #3.ist %
+      -o \jobname.#1.ind %
+      -t \jobname.#1.ilg %
+      \jobname.#1.idx}
+  \fi
+  }
+
+\let\makeindexcmdline\@gobble
+\def\m@keind@xcmdline#1{\AtEndDocument{\M@keInd@xCMDLine@ux{#1}}}
+\def\M@keInd@xCMDLine@ux#1{%
+  \if@filesw
+    \immediate\write\@auxout{%
+      \string\makeindexcmdline{#1}}%
+  \fi
+  }
+
+%%%%%% may be improved !
+%%%%\def\newgl@ss@ry#1#2#3{%
+%%%%  \def\gl@ss@ryd@t@{#1}
+%%%%  \ifx\gl@ss@ryd@t@\@empty%
+%%%%  \else
+%%%%    \m@kegl@ss@rycmdline{%
+%%%%      \jobname.aux %
+%%%%      \gdfpath#1.gdf}%% ad hoc cf. gtsIndex.ini
+%%%%    \m@keind@xcmdline{%
+%%%%      -s #3.ist %
+%%%%      -o \jobname.glx %
+%%%%      -t \jobname.glg %
+%%%%      \jobname.gxs}
+%%%%  \fi
+%%%%  }
+%%%%
+%%%%\let\glosstexcmdline\@gobble
+%%%%\def\m@kegl@ss@rycmdline#1{\AtEndDocument{\M@keGl@ss@ryCMDLine@ux{#1}}}
+%%%%\def\M@keGl@ss@ryCMDLine@ux#1{%
+%%%%  \if@filesw
+%%%%    \immediate\write\@auxout{%
+%%%%      \string\glosstexcmdline{#1}}%
+%%%%  \fi
+%%%%  }
+
+\newcommand\wordindexname{Index}
+\def\makewordindex{\newind@x{wrd}{\wordindexname}{gtsIndex-wrd}}
+\@onlypreamble\makewordindex
+\def\wordindexprologue#1{\gdef\@wordindexprologue{#1}}
+\wordindexprologue{}
+\def\printwordindex{\@print@index[wrd][\@wordindexprologue]}
+
+\let\indexname\wordindexname
+\let\makeindex\makewordindex
+\let\printindex\printwordindex
+
+%% may be improved !
+\newcommand\listsymbolname{List of Symbols}
+\def\makelistofsymbols#1{%
+  \newgl@ss@ry{#1}{\listsymbolname}{glosstex}%% may be improved !
+  \glosstex{*}%% ad hoc
+  }
+\@onlypreamble\makelistofsymbols
+\def\listofsymbolsprologue#1{\gdef\@listofsymbolsprologue{#1}}
+\listofsymbolsprologue{}
+\def\printlistofsymbols{\printglosstex[n]}%% may be improved !
+
+
+
+%%  see article.cls and makeidx.sty
+\newcommand\authorindexname{Author~Index}
+%%  see autind.sty and autind.tex for documentation
+\def\makeauthorindex{%
+  \newind@x{\authorindextag}{\authorindexname}{gtsIndex-aut}
+  \adjustcitation\cite
+  }
+\@onlypreamble\makeauthorindex
+\def\authorindexprologue#1{\gdef\@authorindexprologue{#1}}
+\authorindexprologue{}
+\def\printauthorindex{\@print@index[\authorindextag][\@authorindexprologue]}
+
+%%  see bibref.sty and gtsalpha.bst for documentation
+\newind@x{bba}{}{gtsIndex-Bib}
+\newcommand{\biblabel}[2]{%
+  \global\@namedef{br@#1}{#2}%
+  }
+
+\newcommand{\bibref}[1]{%
+  \unskip\space
+  \@ifundefined{br@#1}{%
+%    (\textbf{??})%
+    }{%
+      \edef\reserved@a{\@nameuse{br@#1}}%
+      \expandafter\@bibref\expandafter{\reserved@a}%
+    }%
+  }
+
+\newcommand{\@bibref}[1]{%
+  \@tempswatrue
+  \lookfor@comma#1,\@nil
+  \if@tempswa \lookfor@dash#1-\@nil \fi
+  \if@tempswa
+    [page~\reserved@a]%%(page~\reserved@a)%
+  \else
+    [pages~\reserved@a]%%(pages~\reserved@a)%
+  \fi
+  }
+
+\def\lookfor@comma#1,#2\@nil{%
+  \if!#2!\else\@tempswafalse\fi
+  }
+
+\def\lookfor@dash#1-#2\@nil{%
+  \if!#2!\else\@tempswafalse\fi
+  }
+
+\let\@@cite\cite
+
+\renewcommand{\cite}[2][]{%
+  \@for\@citea:=#2\do{%
+    \edef\reserved@a{%
+      \noexpand\index[bba]{\@citea}%
+      }%
+    \reserved@a
+    }%
+    \def\reserved@a{#1}%
+    \ifx\reserved@a\@empty
+      \@@cite{#2}%
+    \else
+      \@@cite[#1]{#2}%
+    \fi
+  }
+
+\def\bibliographyprologue#1{\gdef\@bibliographyprologue{#1}}
+\bibliographyprologue{}
+
+\newcommand{\thebibliographypreamble}{%
+  \@input@{\jobname.bba.ind}
+  }
+
+\newcommand{\thebibliographyprologue}{%
+  \ifx\@bibliographyprologue\@empty\else
+    \item[]\@bibliographyprologue\bigskip\fi
+  }
+
+\newcommand{\authorindexbfpage}[1]{{\bfseries #1}}
+\newcommand{\dobf}[1]{\index[\authorindextag]{#1|authorindexbfpage}}
+\def\authorindexentries#1#2{%
+  \if@filesw
+    \def\@tempa{#2}%
+    \edef\@tempa{%
+      \write\@auxout{%
+        \string\bibcite{autind@#1}{\@nearverbatim\@tempa}%
+        }%
+      }%
+    \@tempa
+  \fi
+  \begingroup
+    \def\do{\dobf}%%\def\do{\index[\authorindextag]}%
+      #2%
+  \endgroup
+}
+
+\endinput
+%%
+%% End of file `gtsIndex.sty'.
